@@ -38,6 +38,12 @@ public:
         z *= a.z;
         return *this;
     }
+    double max(){
+        return std::max(x, std::max(y, z));
+    }
+    double min(){
+        return std::min(x, std::min(y, z));
+    }
 };
 
 inline double length(const Vec3& v){
@@ -64,13 +70,27 @@ inline std::ostream& operator<<(std::ostream &out, const Vec3 &v) {
     return out << v.x << ' ' << v.y << ' ' << v.z;
 }
 
+inline Vec3 Min(const Vec3& a, const Vec3& b){
+    return Vec3(std::min(a.x, b.x), std::min(a.y, b.y), std::min(a.z, b.z));
+}
+
+inline Vec3 Max(const Vec3& a, const Vec3& b){
+    return Vec3(std::max(a.x, b.x), std::max(a.y, b.y), std::max(a.z, b.z));
+}
 
 inline Vec3 operator+(const Vec3 &u, const Vec3 &v) {
     return Vec3(u.x + v.x, u.y + v.y, u.z + v.z);
 }
 
+inline Vec3 operator+(const Vec3 &u, const double &v) {
+    return Vec3(u.x + v, u.y + v, u.z + v);
+}
 inline Vec3 operator-(const Vec3 &u, const Vec3 &v) {
     return Vec3(u.x - v.x, u.y - v.y, u.z - v.z);
+}
+
+inline Vec3 operator-(const Vec3 &u, const double &v) {
+    return Vec3(u.x - v, u.y - v, u.z - v);
 }
 
 inline Vec3 operator*(const Vec3 &u, const Vec3 &v) {
@@ -85,8 +105,16 @@ inline Vec3 operator*(const Vec3 &v, double t) {
     return t * v;
 }
 
+inline Vec3 operator/(const Vec3& v, const Vec3& divor) {
+    return Vec3(v.x / divor.x, v.y / divor.y, v.z / divor.z);
+}
+
 inline Vec3 operator/(Vec3 v, double t) {
     return (1/t) * v;
+}
+
+inline Vec3 operator/(const double& t, const Vec3& v){
+    return Vec3(t / v.x, t / v.y, t / v.z);
 }
 
 inline Vec3 normalize(Vec3 v) {

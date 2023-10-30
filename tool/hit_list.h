@@ -34,22 +34,19 @@ bool hit_list::hit(const ray &r, const double& tmin, const double& tmax, hit_rec
     }
     return hits;
 }
-std::shared_ptr<bounding_box> hit_list::get_aabb() const
-{
-    if( objects.size() == 0 ){
-        return nullptr;
-    }
 
-    bounding_box ret;
+inline std::shared_ptr<bounding_box> hit_list::get_aabb() const
+{
+    bounding_box kk;
     bool first_aabb = true;
     for(auto obj : objects){
         auto k = obj->get_aabb();
-        if( k == nullptr )
+        if( !k )
             return nullptr;
-        ret = first_aabb ? *k : surrounding_box(ret, *k);
+        kk = first_aabb ? *k : surrounding_box(*k, kk);
         first_aabb = false;
     }
-    return std::make_shared<bounding_box>(ret);
+    return std::make_shared<bounding_box>(kk);
 }
 
 #endif  

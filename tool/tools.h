@@ -26,11 +26,11 @@ public:
     bounding_box(const Vec3 &v1, const Vec3 &v2) : p1(v1), p2(v2){}
     bounding_box(const bounding_box &v) : p1(v.p1), p2(v.p2){}
     bool hit(const ray&r) const{
-        double tx1 = (p1.x - r.pos.x) / r.dir.x, tx2 = (p2.x - r.pos.x) / r.dir.x;
-        double ty1 = (p1.y - r.pos.y) / r.dir.y, ty2 = (p2.y - r.pos.y) / r.dir.y;
-        double tz1 = (p1.z - r.pos.z) / r.dir.z, tz2 = (p2.z - r.pos.z) / r.dir.z;
-        double t1 = std::max(tx1, std::max(ty1, tz1)), t2 = std::min(tx2, std::min(ty2, tz2));
-        return t2 > 0 && t2 > t1;
+        auto res_dir = 1 / r.dir;
+        auto t1 = (p1 - r.pos) * res_dir, t2 = (p2 - r.pos) * res_dir;
+        auto k1 = Min(t1, t2), k2 = Max(t1, t2);
+        auto s1 = k1.max(), s2 = k2.min();
+        return s2 >= 0 && s2 >= s1;
     }                                                                                                                           
 };
 
@@ -42,9 +42,7 @@ bounding_box surrounding_box(const bounding_box& a, const bounding_box& b){
 }
 
 bounding_box surrounding_box(const std::shared_ptr<bounding_box>& a, const std::shared_ptr<bounding_box>& b){
-    Vec3 t1{std::min(a->p1.x, b->p1.x), std::min(a->p1.y, b->p1.y), std::min(a->p1.z, b->p1.z)};
-    Vec3 t2{std::max(a->p2.x, b->p2.x), std::max(a->p2.y, b->p2.y), std::max(a->p2.z, b->p2.z)};
-    return bounding_box{t1, t2};
+    return bounding_box{Min(a->p1, b->p1), Max(a->p2, b->p2)};
 }
 //角度转弧度
 inline double degre_to_radians(const double& degre){
@@ -146,7 +144,7 @@ double schlick(const double& cosine,const double& ref_idx) {
 
 inline bool box_x_compare(const std::shared_ptr<object>& a, const std::shared_ptr<object>& b){
     auto k1 = a->get_aabb(), k2 = b->get_aabb();
-    if( !k1 || !k2 ){
+    if( !k2 || !k2 ){
         std::cerr << "No bounding box can be found" << std::endl;
     } 
     return k1->p1.x < k2->p1.x;
@@ -154,7 +152,7 @@ inline bool box_x_compare(const std::shared_ptr<object>& a, const std::shared_pt
 
 inline bool box_y_compare(const std::shared_ptr<object>& a, const std::shared_ptr<object>& b){
     auto k1 = a->get_aabb(), k2 = b->get_aabb();
-    if( !k1 || !k2 ){
+    if( !k2 || !k2 ){
         std::cerr << "No bounding box can be found" << std::endl;
     } 
     return k1->p1.y < k2->p1.y;
@@ -162,7 +160,7 @@ inline bool box_y_compare(const std::shared_ptr<object>& a, const std::shared_pt
 
 inline bool box_z_compare(const std::shared_ptr<object>& a, const std::shared_ptr<object>& b){
     auto k1 = a->get_aabb(), k2 = b->get_aabb();
-    if( !k1 || !k2 ){
+    if( !k2 || !k2 ){
         std::cerr << "No bounding box can be found" << std::endl;
     } 
     return k1->p1.z < k2->p1.z;

@@ -17,12 +17,8 @@ public:
     bvh(std::vector<std::shared_ptr<object>> &objects, 
         const size_t& start, const size_t& end);
     virtual bool hit(const ray &r, const double &tmin, const double &tmax, hit_record &rec) const;
-    virtual std::shared_ptr<bounding_box> get_aabb() const;
+    virtual std::shared_ptr<bounding_box> get_aabb( ) const;
 };
-
-std::shared_ptr<bounding_box> bvh::get_aabb() const{
-    return std::make_shared<bounding_box>(box);
-}
 
 inline bvh::bvh(std::vector<std::shared_ptr<object>> &objects, const size_t& start, const size_t& end)
 {
@@ -61,8 +57,13 @@ bool bvh::hit(const ray &r, const double &tmin, const double &tmax, hit_record &
     }
     auto k1 = left->hit(r, tmin, tmax, rec);
     auto k2 = right->hit(r, tmin, k1 ? rec.t : tmax, rec);
-    return left->hit(r, tmin, tmax, rec) || right->hit(r, tmin, tmax, rec);
+    return k1 || k2;
     // left 可以指向不同的数据类型， 只有到最后的叶节点才会进行 与实物相交
+}
+
+inline std::shared_ptr<bounding_box> bvh::get_aabb() const
+{
+    return std::make_shared<bounding_box>(box);
 }
 
 #endif

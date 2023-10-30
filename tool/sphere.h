@@ -42,10 +42,11 @@ bool sphere::hit(const ray&r, const double& tmin,const double& tmax, hit_record 
         }
     }
     return false;
-}   
-
-std::shared_ptr<bounding_box> sphere::get_aabb() const{
-    Vec3 k{radius, radius, radius};
-    return std::make_shared<bounding_box>(center - k, center + k);
 }
+
+inline std::shared_ptr<bounding_box> sphere::get_aabb() const
+{
+    return std::make_shared<bounding_box>(Vec3(center - radius), Vec3(center + radius));
+}
+
 #endif
