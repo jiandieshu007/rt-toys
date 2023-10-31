@@ -8,10 +8,10 @@ class material;
 class bounding_box;
 
 struct hit_record{
-    bool ishit; //
     Vec3 hitpoint;
     Vec3 normal;
-    double t;
+    double t; //击中的时间
+    double u, v;
     std::shared_ptr<material> material_ptr; //存储了什么材质的材料 决定了光线打在表面之后如何传播
     bool face_front; // true 表示从外部射入的光线 false反之
 

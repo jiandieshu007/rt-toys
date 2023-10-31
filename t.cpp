@@ -71,16 +71,30 @@ hit_list random_scene() {
     return static_cast<hit_list>(std::make_shared<bvh>(world.objects, 0, world.objects.size()));
 }
 
+hit_list two_spheres() {
+    hit_list objects;
+
+    auto checker = std::make_shared<checker_texture>(
+        std::make_shared<constant_texture>(Vec3(0.2, 0.3, 0.1)),
+        std::make_shared<constant_texture>(Vec3(0.9, 0.9, 0.9))
+    );
+
+    objects.add(std::make_shared<sphere>(Vec3(0,-10, 0), 10, std::make_shared<texture_lambertian>(checker)));
+    objects.add(std::make_shared<sphere>(Vec3(0, 10, 0), 10, std::make_shared<texture_lambertian>(checker)));
+
+    return static_cast<hit_list>(std::make_shared<bvh>(objects.objects, 0, objects.objects.size()));
+}
+
 int main() {
-    const int image_width = 256, image_height = 144, sample_per_pixel = 1000;
+    const int image_width = 200, image_height = 100, sample_per_pixel = 1000;
     const double aspect = image_width / image_height;
 
     std::cout << "P3\n"
               << image_width <<
         " " << image_height << "\n255\n";
 
-    camera cam(pos, lookat, up, 20, aspect, aperture, dist_to_focus);
-    auto world = random_scene();
+    camera cam(pos, lookat, up, 20, aspect, aperture, dist_to_focus, 0, 1);
+    auto world = two_spheres();
     for (int j = image_height-1; j >= 0; --j) {
         std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
         for (int i = 0; i < image_width; ++i) {

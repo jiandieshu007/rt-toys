@@ -10,11 +10,13 @@ public:
     Vec3 origin, vertical, horizontal, lower_left_corner;
     Vec3 u, v, w; // 三个轴，x y z 轴
     double lens_radius; //光圈大小
+    double tmin, tmax;
 
 public:
 //up 指向 y轴正半轴 lookat 看向z轴负半轴
     camera(const Vec3& pos, const Vec3& lookat, const Vec3& up, const float& fov, const float& aspect,
-        const double& aperture,const double& foucus_dist){ // focus_dist 为焦距 aperture 为光圈大小
+        const double& aperture,const double& foucus_dist, const double& t1 =0, const double & t2 = 0)
+        : tmin(t1),tmax(t2) { // focus_dist 为焦距 aperture 为光圈大小
         origin = pos; //设置原点位置
         lens_radius = aperture / 2;
         double theta = degre_to_radians(fov / 2);
@@ -35,7 +37,7 @@ public:
         Vec3 rd = lens_radius * random_in_unit_disk();
         Vec3 offset = camera::u * rd.x + camera::v * rd.y;
 
-        return ray(origin+offset, lower_left_corner + u*horizontal + v*vertical - origin-offset);
+        return ray(origin+offset, lower_left_corner + u*horizontal + v*vertical - origin-offset, random_double(tmin,tmax));
     }
 };
 

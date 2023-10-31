@@ -6,12 +6,11 @@
 class ray{
 public:
     Vec3 pos, dir;
+    double t; // 记录存在的时刻
 
 public:
-    ray() : pos{}, dir{} {}
-    ray(const Vec3 &p, const Vec3 &d) : pos(p), dir(normalize(d)){}
-    Vec3 position() const { return pos; }
-    Vec3 direction() const { return dir; }
+    ray() : pos{}, dir{}, t{} {}
+    ray(const Vec3 &p, const Vec3 &d, const double& tt) : pos(p), dir(normalize(d)), t(tt){}
     Vec3 at(double t) const { return pos + dir * t; }
 };
 

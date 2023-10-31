@@ -4,6 +4,8 @@
 #include"../tool/ray.h"
 #include"../tool/Vec3.h"
 #include"../tool/object.h"
+#include"../tool/tools.h"
+
 class material{
 public:
     virtual bool scatter(const ray &r_in, const hit_record &rec, Vec3 &attenuation, ray &scattered) const = 0;
@@ -19,8 +21,24 @@ public:
 
     virtual bool scatter(const ray &r_in, const hit_record &rec, Vec3 &attenuation, ray &scattered) const{
         Vec3 scatter_dir = rec.normal + random_in_vector();
-        scattered = ray(rec.hitpoint, scatter_dir);
+        scattered = ray(rec.hitpoint, scatter_dir, r_in.t + rec.t);
         attenuation = albedo;
+        return true;
+    }
+};
+
+// 纹理漫反射材料
+class texture_lambertian : public material{
+public:
+    std::shared_ptr<texture> tex_ptr;
+
+public:
+    texture_lambertian() : tex_ptr(nullptr) {}
+    texture_lambertian(const std::shared_ptr<texture> &v) : tex_ptr(v){}
+    virtual bool scatter(const ray &r_in, const hit_record &rec, Vec3 &attenuation, ray &scattered) const{
+        Vec3 scatter_dir = rec.normal + random_in_vector();
+        scattered = ray(rec.hitpoint, scatter_dir, r_in.t + rec.t);
+        attenuation = tex_ptr->tex_value(rec.hitpoint, rec.u, rec.v);
         return true;
     }
 };
@@ -36,7 +54,7 @@ public:
     metal(const Vec3 &v, const double& f) : albedo(v), fuzz(f){}
     virtual bool scatter(const ray& r_in,const hit_record& rec, Vec3& attenuation, ray& scattered) const{
         Vec3 scatter_dir = reflect(r_in.dir, rec.normal);
-        scattered = ray(rec.hitpoint, scatter_dir + fuzz *random_in_hemisphere(rec.normal));
+        scattered = ray(rec.hitpoint, scatter_dir + fuzz *random_in_hemisphere(rec.normal), r_in.t + rec.t);
         attenuation = albedo;
         return dot(scattered.dir, rec.normal) > 0;
     }
@@ -59,12 +77,12 @@ public:
         double refract_prob = schlick(cos_theta, n1_n2); //发生折射的概率 与随机数比较 or 不满足折射条件 则发生镜面反射
         if( n1_n2 * sin_theta > 1  || random_double()  < refract_prob ) {
             Vec3 reflected = reflect(r_in.dir, rec.normal);
-            scattered = ray(rec.hitpoint, reflected);
+            scattered = ray(rec.hitpoint, reflected, r_in.t + rec.t);
             return true;
         }
 
         Vec3 refracted = refract(r_in.dir, rec.normal, n1_n2);
-        scattered = ray(rec.hitpoint, refracted);
+        scattered = ray(rec.hitpoint, refracted, r_in.t + rec.t);
         return true;
     }
 };

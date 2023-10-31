@@ -44,6 +44,41 @@ bounding_box surrounding_box(const bounding_box& a, const bounding_box& b){
 bounding_box surrounding_box(const std::shared_ptr<bounding_box>& a, const std::shared_ptr<bounding_box>& b){
     return bounding_box{Min(a->p1, b->p1), Max(a->p2, b->p2)};
 }
+
+
+class texture{
+public:
+    virtual Vec3 tex_value(const Vec3 &vv, const double &u, const double &v) const = 0;
+};
+
+// 常量纹理值
+class constant_texture : public texture{
+public:
+    Vec3 color;
+
+
+public:
+    constant_texture() : color(Vec3()){}
+    constant_texture( const Vec3& v): color(v){}
+    virtual Vec3 tex_value(const Vec3 &vv, const double &u, const double &v) const;
+};
+
+Vec3 constant_texture::tex_value(const Vec3 &vv, const double &u, const double &v) const{
+
+    return color;
+}
+
+// 创建方格图案的纹理效果
+class checker_texture : public texture{
+public:
+    std::shared_ptr<texture> odd, even;
+
+public:
+    checker_texture() : odd(nullptr), even(nullptr){}
+    checker_texture(const std::shared_ptr<texture>& a, const std::shared_ptr<texture>& b) : odd(a), even(b) {}
+    virtual Vec3 tex_value(const Vec3 &vv, const double &u, const double &v) const;
+};
+
 //角度转弧度
 inline double degre_to_radians(const double& degre){
     return degre * pi / 180;
@@ -166,4 +201,11 @@ inline bool box_z_compare(const std::shared_ptr<object>& a, const std::shared_pt
     return k1->p1.z < k2->p1.z;
 }
 
+Vec3 checker_texture::tex_value(const Vec3 &vv, const double &u, const double &v) const{
+    auto sines = sin(10*vv.x)*sin(10*vv.y)*sin(10*vv.z);;
+    if( sines < 0 )
+        return odd->tex_value(vv, u, v);
+    else
+        return even->tex_value(vv, u, v);
+}
 #endif
